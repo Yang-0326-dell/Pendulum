@@ -1,0 +1,1254 @@
+#define _CRT_SECURE_NO_WARNINGS
+#define _ATL_MIN_CRT
+#include<windows.h>
+#include<stdlib.h>
+#include<iostream>
+#include <fstream>
+#include<string>
+#include<vector>
+using std::vector;
+#include<array>
+#include<math.h>
+#include <time.h>
+#include<stdio.h>
+#include<chrono>
+#include<sstream>
+using namespace std;
+
+struct  fs {
+    int X;
+    int Y;
+};
+
+struct U {
+    double x0;
+    double x1;
+};
+
+struct exp {
+
+};
+
+struct name {
+    int g;
+    int N;
+    bool c;
+};
+
+struct rel {
+    string n;
+    int g;
+    int N;
+    bool c;
+    bool G;
+};
+
+#define PI 3.14159
+#define e 2.718
+#define PASSWORD "11"
+//#define people {"fxw","syj","yy","wx","ycy","lsqi","lsqian","zzx","","","","","","","","","","","","","","","","",""}
+
+long long gettime(bool state)
+{
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
+BOOL watch(long break1) {
+    long t1 = gettime(1);
+    long t2=0;
+    while (1) {
+        t2 = gettime(1);
+        if (t2 - t1>=break1) {
+            break;
+        }
+    }
+    return 1;
+}
+
+COORD get_font_size()
+{
+    COORD font_size;
+    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    struct CONSOLE_FONT
+    {
+        DWORD index;
+        COORD dim;
+    } cfi;
+    typedef COORD(WINAPI* PROCGETCONSOLEFONTSIZE)(HANDLE, DWORD);
+    typedef BOOL(WINAPI* PROCGETCURRENTCONSOLEFONT)(HANDLE, BOOL, struct CONSOLE_FONT*);
+
+    HMODULE hKernel32 = GetModuleHandle(L"kernel32");
+    PROCGETCONSOLEFONTSIZE GetConsoleFontSize = (PROCGETCONSOLEFONTSIZE)GetProcAddress(hKernel32, "GetConsoleFontSize");
+    PROCGETCURRENTCONSOLEFONT GetCurrentConsoleFont = (PROCGETCURRENTCONSOLEFONT)GetProcAddress(hKernel32, "GetCurrentConsoleFont");
+
+    GetCurrentConsoleFont(handle, FALSE, &cfi);
+    font_size = GetConsoleFontSize(handle, cfi.index);
+
+    return font_size;
+}
+
+VOID KillConsoleCloseButton(VOID) {
+    DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_DISABLED);
+    DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_MAXIMIZE, MF_DISABLED);
+    DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_MINIMIZE, MF_DISABLED);
+    DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_MOUSEMENU, MF_DISABLED);
+    SetWindowLongPtrA(
+        GetConsoleWindow(),
+        GWL_STYLE,
+        GetWindowLongPtrA(GetConsoleWindow(), GWL_STYLE)
+        & ~WS_SIZEBOX & ~WS_MAXIMIZEBOX & ~WS_MINIMIZEBOX
+    );
+
+    HWND hWnd = GetConsoleWindow();
+    SetWindowLong(hWnd, GWL_EXSTYLE, WS_EX_TRANSPARENT);
+
+    CONSOLE_CURSOR_INFO cursor_info = { 1,0 };
+    SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursor_info);
+    CONSOLE_SCREEN_BUFFER_INFO buffer_info;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &buffer_info);
+    SMALL_RECT rect = buffer_info.srWindow;
+    COORD size = { rect.Right + 1,rect.Bottom + 1 };
+    SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), size);
+    return;
+}
+
+
+
+VOID RevealConsoleCloseButton(VOID) {
+    DeleteMenu(GetSystemMenu(GetConsoleWindow(), TRUE), SC_ARRANGE, MF_ENABLED);
+    DeleteMenu(GetSystemMenu(GetConsoleWindow(), TRUE), SC_MINIMIZE, MF_ENABLED);
+    DeleteMenu(GetSystemMenu(GetConsoleWindow(), TRUE), SC_MAXIMIZE, MF_ENABLED);
+    DrawMenuBar(GetConsoleWindow());
+
+}
+
+struct fs SetSize() {
+    COORD size;
+    fs r;
+    fs LT;
+    HWND hwnd = GetForegroundWindow();
+    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    long long width = GetSystemMetrics(SM_CXSCREEN);
+
+    long long height = GetSystemMetrics(SM_CYSCREEN);
+    COORD font_size = get_font_size();
+    LT.X = width / 8;
+    LT.Y = height / 12;
+    size.X = width * 3 / 4;
+    size.Y = height * 5 / 6;
+    SetWindowPos(hwnd, HWND_TOPMOST, LT.X, LT.Y, size.X, size.Y, 0);
+    r.X = size.X;
+    r.Y = size.Y;
+    return r;
+}
+
+struct fs SetOriginalpoint(struct fs size) {
+    struct fs O;
+    O.X = size.X / 2 + size.X / 4;
+    O.Y = size.Y / 2 + size.Y / 10;
+
+    return O;
+}
+
+VOID HideConsoleCursor(VOID) {
+    CONSOLE_CURSOR_INFO cursor_info = { 1,0 };
+    SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursor_info);
+    CONSOLE_SCREEN_BUFFER_INFO buffer_info;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &buffer_info);
+    SMALL_RECT rect = buffer_info.srWindow;
+    COORD size = { rect.Right + 1,rect.Bottom + 1 };
+    SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), size);
+}
+
+VOID BackGround(unsigned int FC ,unsigned int BC) {;
+    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(handle, FC + BC * 0x10);
+}
+
+SHORT ColorCollision(int tmp) {
+    short result = tmp % 256;
+    int time = tmp / 256;
+    if (time % 2 == 0) {
+        result = tmp % 256;
+    }
+    else {
+        result = 255 - result;
+    }
+    return result;
+}
+
+DOUBLE abso(double m) {
+    if (m >= 0) {
+        return m;
+    }
+    else {
+        return -m;
+    }
+}
+
+char Exchange(int m) {
+    int n = m % 16;
+    if (n >= 0 && n <= 9) {
+        return n+48;
+    }
+    else {
+        return n + 55;
+    }
+}
+
+double input(string con) {
+begin:
+    string x;
+    double k = 0;
+    double k1 = 0;
+    cout << con;
+    cin.clear();
+    cin.sync();
+    cin >> x;
+    istringstream is(x);
+    is >> k;
+    string y = to_string(k);
+    istringstream is1(y);
+    is1 >> k1;
+    //cout << x << y;
+    if (k1==k) {
+        cout << endl;
+        return k;
+    }
+
+    else {
+        cout << "not valid answer! Please try again.\n"<<con ;
+        goto begin;
+
+    }
+}
+
+int input1(string con,int x0,int x1) {
+begin:
+    string x;
+    int k = 0;
+    cout << con;
+    cin.clear();
+    cin.sync();
+    cin >> x;
+    istringstream is(x);
+    is >> k;
+    string y = to_string(k);
+    //cout << x << y;
+    if (x == y && k >= x0 && k <= x1) {
+        cout << endl;
+        return k;
+    }
+
+    else if (k < x0) {
+        cout << "not valid answer! Too small! Please try again.\n" << con;
+        goto begin;
+    }
+    else if (k > x1) {
+        cout << "not valid answer! Too big! Please try again.\n" << con;
+        goto begin;
+    }
+}
+
+double SetColor(VOID){
+    while (1) {
+        double res = input("Define the color : \n0.White; \n1.Red; \n2.Orange; \n3.Yellow; \n4.Green; \n5.Blue; \n6.Indigo; \n7.Purple; \n8.Lightning(with no thunder); \n9.grey; \n10.infared light; \n11.Ultraviolet; \n12.kaleidoscope;  ");
+        if (res >= 0 && res <= 12) {
+            return res;
+            break;
+    }
+        else if (res < 0) {
+            cout << "Not valid answer! Too small!Please try again." << endl;
+        }
+        else {
+            cout << "Not valid answer! Too big! Please try again." << endl;
+        }
+        
+    }
+}
+
+VOID DrawLine( double k, double b, struct fs originalpoint, struct fs size, COLORREF line,struct U U, bool state) {
+    HWND myconsole = GetConsoleWindow();
+    HDC hdc = GetDC(myconsole);
+
+    int x = originalpoint.X + U.x0;
+    int y = originalpoint.Y - k * U.x0 - b * size.X / 40;
+    for (int i = -5; i <= 5; i++) {
+        for (int j = 0; j <= 10; j++) {
+            SetPixel(hdc, x+i, y+j, line);
+        }
+    }
+
+    if (U.x0 ==-10000) {
+        U.x0= -size.X * 8 / 13;
+    }
+    if (U.x1 == 10000) {
+        U.x1 = size.X * 8 / 13;
+    }
+    if (U.x1 < U.x0) {
+        double tmp = U.x1;
+        U.x1 = U.x0;
+        U.x0 = tmp;
+}
+    for (int x = U.x0; x <= U.x1; x++) {
+        SetPixel(hdc, originalpoint.X + x, originalpoint.Y - k * x - b * size.X / 40, line);
+    }
+
+}
+
+VOID DrawBigPoint(struct U coor,struct fs P,COLORREF p) {
+    HWND hWnd = GetConsoleWindow();
+    HDC hdc = GetDC(hWnd);
+    for (double i = -5; i <= 5; i+=0.1) {
+        for (double j = -sqrt(25-i*i); j <= sqrt(25-i*i); j+=0.1) {
+            SetPixel(hdc, P.X+coor.x0 + P.Y-j, coor.x1 - i, p);
+        }
+    }
+}
+
+VOID DrawPoint(double x, double y, COLORREF p) {
+    HDC hdc = GetDC(GetConsoleWindow());
+    SetPixel(hdc, x, y, p);
+}
+
+VOID DrawWorld(VOID) {
+    struct fs size = SetSize();
+    HDC hdc = GetDC(GetConsoleWindow());
+    for (int i = size.X*1.5; i >= 500; i--) {
+        for (int j = 100; j <= size.Y*2; j++) {
+            SetPixel(hdc, i, j, RGB(ColorCollision(i), ColorCollision(j), ColorCollision(i + j)));
+        }
+    }
+}
+
+VOID DrawHeart(int cmode) {
+    HDC hdc = GetDC(GetConsoleWindow());
+    struct fs size = SetSize();
+    double x = -2;
+    int r0=0,r1=0,r2=0,g0=0, g1=0,g2=0,b0=0, b1=0,b2=0;
+    switch (cmode) {
+    case 0://red
+        r0 = 255;
+        break;   
+    case 1://green
+        g0 = 255;
+            break;   
+    case 2://blue
+        b0 = 255;
+                break; 
+    case 3://yellow
+        r0 = 128, g0 = 255;
+                    break;
+    case 4://purple
+        r0 = 255, b0 = 255;
+        break;
+    case 5:
+        g0 = 128, b0 = 255;
+        break;
+    case 6:
+        r1 = b1 = 3, g2 = b2 = 2;
+        break;
+    case 7:
+        r2 = b1 = 3, g1 = b2 = 2;
+        break;
+    case 8:
+        r1 = g2 = b1 = b2 = 1;
+        break;
+    case 9:
+        r1 = g2=1,g1= r2 = 0.5;
+        break;
+    case 10:
+        b1 = b2 = g1 = g2 = 1;
+        break;
+    case 11:
+        r1 = g1 = 1,b1 =  r2 =1.5, g2 = b2 = 2;
+        break;
+    case 12:
+        r1 = g1 = g2 = b2 = 1,r0=128;
+        break;
+    case 13:
+        r2 = 0.5, b1 = b2 = r1 = 1,r0=128,g0=50;
+        break;
+    default:
+        r2 = 0.5, g1 = g2 = r1 = 1,r0=200,g0=100;
+        break;
+    }
+    for (x = -2; x <= 2; x += 0.001) {
+        double tmp1 = sqrt(abso(x) / 2);
+        double y1 = PI*sqrt(1-tmp1);
+        double y2 = -sqrt(1 - (1-abso(x)) * (1-abso(x)));
+        for (int i = y2 * 100; i <= y1 * 100; i++) {
+            int x0 = x * 100 + size.X * 0.618;
+            int y0 = i + size.Y * 0.5;
+            SetPixel(hdc,x0,y0,RGB(ColorCollision(r0+x0 *r1+y0*r2), ColorCollision(g0+x0*g1+y0*g2), ColorCollision(b0+x0*b1+y0*b2)));
+        }
+    }
+    //for (double i = -2; i <= 2; i+=0.01) {
+    //    SetPixel(hdc, i*100, 1/cos(1-abso(i)) *100 +size.Y/2, RGB(255, 255, 255));
+    //}
+    return;
+}
+
+VOID AutoSetColor(VOID) {
+    char res[9] = {99,111,108,111,114,32};
+    int i1, i2;
+    while (1) {
+  srand(unsigned(time(NULL)));
+    i1 = rand() % 16;
+    i2 = rand() % 16;
+    if (i1 != 12) {
+        break;
+    }
+    }
+    res[6] = Exchange(i1);
+    res[7] = Exchange(i2);
+
+    system(res);
+    return;
+}
+
+VOID Puzzle0() {
+    string yourgender;
+    bool yg=input("Your gender?\n0.Male;\n1.Female");
+    //vector<name> people;
+    struct rel a;
+    //vector<rel> ope{ {"elder brother",0,1,1,0},{"elder sister",0,1,0,0},{"little brother",0,-1,1,0 }, { "little sister",0,-1,0,0 }, {"father",1,0,1},{"mother",1,0,0},{"husband",0,0,1}, {"wife",0,0,0},{"son",-1,0,1} ,{"daughter",-1,0,0} };
+    vector<rel> ope{ {"哥哥",0,1,1,0},{"姐姐",0,1,0,0},{"弟弟",0,-1,1 ,0}, { "妹妹",0,-1,0 }, {"父亲",1,0,1,1},{"母亲",1,0,0,1},{"丈夫",0,0,1,0 }, {"妻子",0,0,0},{"儿子",-1,0,1} ,{"女儿",-1,0,0} };
+    srand((unsigned)time(NULL));
+    int times;
+    while (1) {
+        int tmp = rand() % 10;
+        if (tmp >= 6) {
+            times = tmp;
+            break;
+        }
+    }
+    vector<int> o1(times+1);
+    for (int i = 0; i <= times; i++) {
+        o1[i]=rand() % 8;
+        if (i > 0 && ope[o1[i]].c == ope[o1[i-1] ].c) {
+            i--;
+        }
+    }
+    string question;
+    cout << "你的";
+    for (int i = 0; i <= times; i++) {
+        cout << ope[o1[i]].n << "的";
+    }
+    cout << "是:";
+    int g1=0;
+    for (int i = 0; i <= times; i++) {
+        g1 += ope[o1[i]].g;
+    }
+    int No = 1;
+    for (int i = 0; i <= times; i++) {
+        No += ope[o1[i]].N;
+        if (ope[o1[i]].N == 0) {
+            No = 1;
+        }
+    }
+    
+    string result;
+}
+
+INT II(int i1, int i2) {
+    int res=1;
+    for (int i = i1; i <= i2; i++) {
+
+    }
+}
+
+INT cigma( vector<int> s,int x0,int y0,int x, int y,int t,int pro,int re) {
+    bool state1=0;
+    int times=0;
+    int tmp1 = 1;
+    int pow = x;
+    int result;
+    for (int i = x; i <= y; i++) {
+        cout << 0<<endl;
+        if (t!=0) {//还未跳到最后一个元素
+            if (y-x<t) {
+                cout << 11 << endl;
+                pro *= s[i];
+                result=cigma(s, x0 + 1, y0, x0 + 2, y, t - 1,pro,re);
+                //return re;
+                //break;
+            }
+            else {
+                cout << 12 << endl;
+                pro *= s[i];
+                result=cigma(s, x0, y0, x + 1, y, t - 1,pro,re);
+            }
+        }
+        else {//已跳到最后一个元素
+            if (i < y) {//最后一个元素未达到上限
+                cout << 21 << endl;
+                result=cigma(s, x0, y0, x + 1, y, t, pro, re += pro * s[i]);
+              /*  return re += pro * s[i];
+                break;*/
+            }
+            else {//最后一个元素已达到上限
+                cout << 22<<endl;
+                //result=cigma(s, x0, y0, x + 1, y, t+1, pro, re += pro * s[i]);
+                return re+=pro*s[i];
+                break;
+            }
+        }
+        cout << "00"<<endl;
+}
+}
+
+INT cigma1(vector<int> s, int result, int pro, int x, int y, int t) {
+    int res;
+    for (int i = x; i <= y-t; i++) {
+     
+        //cout << s[i]<<" ";
+        if (t==0&&s[i]!=0) {
+            result += pro * s[i];
+            /*cout << "1" << endl;*/
+        }
+        else if (t < 0) {
+            break;
+        }
+        else if(t>0){
+            if (s[i] == 0) s[i] = 0;
+            int tmp=cigma1(s, 0, pro * s[i], i+1, y, t - 1);
+            result += tmp;
+        }
+    }
+    //cout << endl;
+    return result;
+}
+
+INT test(int m) {
+    m++;
+    cout << m ;
+    return test(m);
+}
+
+INT Puzzle1() {
+    while (1) {
+        if (watch(100) == 1) {
+            break;
+        }
+    }
+    srand(unsigned(time(NULL)));
+    int times ;
+    while (1) {
+        times = rand()%10;
+        if (times >= 5) {
+            break;
+        }
+    }
+    vector<int> s0(times);
+    while (1) {
+        for (int i = 0; i <= times-1; i++) {
+            s0[i] = rand() % 10-5;
+        }
+        int pro=1;
+        for (int i = 0; i <= times - 1; i++) {
+            pro *= s0[i];
+        }
+        if (abso(pro) <= 1000) {
+            break;
+        }
+    }
+    for (auto& i : s0) {
+        //cout<<i<<endl;
+    }
+    vector<int>s1(times+1);
+    for (int i = 0; i <= times-1; i++) {
+            s1[i] = cigma1(s0, 0,1, 0, times-1 , times - 1 - i);
+        
+    }
+    s1[times ] = 1;
+    vector<double> s2(times+1);
+    for (int i = 0; i <= times; i++) {
+        s2[i] = s1[i];
+    }
+    double t0= rand()%50;
+    t0 *= 0.1;
+    for (auto& i : s2) {
+        i *= t0;
+    }
+    cout << "Solve the equation:" << endl;
+    for (int i = times; i >= 0;i--) {
+        if ( s2[i]!= 0&&i!=0) {
+            cout << s2[i]<<"x^" << i;
+            if (s2[i -1] > 0) {
+                cout << "+";
+            }
+            else {
+                cout << "";
+            }
+          }
+        else {
+
+        }
+    }
+    cout << endl;
+    cout << "Please input all the root of that equation." << endl;
+    long t01 = gettime(1);
+    vector<int> ans(times );
+    for (int i = 0; i <= times-1; i++) {
+        cout << "x" << i+1 << "=";
+        cin >> ans[i];
+    }
+    vector<bool> test(times - 1);
+    for (int i = 0; i <= times - 1; i++) {
+        for (int j = 0; j <= times - 1; j++) {
+            if (ans[i] == s0[j]||test[j]!=1) {
+                test[j] = 1;
+            }
+            else {
+                //test[j] = 0;
+            }
+        }
+    }
+    int pro1=1;
+    for (int i = 0; i <= times - 1; i++) {
+        pro1 *= test[i];
+    }
+    if (pro1 == 1&&gettime(1)-t01<=12000) {
+        return 1;
+    }
+    else if (pro1==0&&gettime(1) - t0 > 12000) {
+        return 2;
+    }
+    else {
+        return 0;
+    }
+}
+
+BOOL Puzzle2() {
+    while (1) {
+        if (watch(100) == 1) {
+            break;
+        }
+    }
+    int x;
+    vector<int> r(5);
+    vector<int> answer(2);
+    while (1) {
+        while (1) {
+            while (1) {
+                x = rand() % 1000;
+                if (x >= 100) {
+                    break;
+                }
+            }
+            r[0] = x % 1;
+            r[1] = x % 2;
+            r[2] = x % 3;
+            r[3] = x % 5;
+            r[4] = x % 7;
+            r[5] = x % 11;
+            int timer = 0;
+            vector<int> ans1;
+            for (int i = 100; i <= 999; i++) {
+                if (i % 2 == r[1] && i % 3 == r[2] && i % 5 == r[3] && i % 7 == r[4]&&i%11==r[5]) {
+                    ans1.push_back(i);
+                    timer++;
+                }
+            }
+            if (timer >= 3) {
+                for (auto i : ans1) {
+                    cout << i<<endl;
+                }
+            }
+            else if (timer == 2) {
+                answer[0] = ans1[0];
+                answer[1] = ans1[1];
+                break;
+            }
+            else if (timer == 1) {
+                answer[0] = ans1[0];
+                answer[1] = ans1[0]+2310;
+                break;
+            }
+        }
+        cout << "There is such a number with three digits that the remainer is " << r[1] << " if divided by 2, " << r[2] << " if divided by 3, " << r[3] << " if divided by 5, " << r[4] << " if divided by 7, "<<r[5]<<" if divided by 11. Then how many is the number?" << endl;
+        int ans = input("");
+        if (ans == answer[0] || ans == answer[1]) {
+            return 1;
+            break;
+        }
+        else {
+            return 0;
+            break;
+        }
+    }
+}
+
+BOOL LOGGIN(VOID) {
+    int colormode;
+    string te;
+    cout << "Before access the program, plz solve a puzzle first, and you have five chances(If you agree, input OK, or input anything else to exit).:)"<<endl;
+    cin >> te;
+    if (te == "OK" || te == "ok" || te == "yes" || te == "y" || te == "yea" || te == "yeaa" || te == "yeaaa" || 
+        te == "alright" || te == "Alright" || te == "ohk" || te == "Ohk" || te == "cnm" || 
+        te == "cao" ||te == "阿巴阿巴" || te == "emmm" || te == "nm" || te == "rua"|| te == "a") {
+    }
+    else if (te == "杨锦逊" || te == "yjx") {
+        cout << "And up there in the heavens\nGalileo saw reflectons of us too\nPluribus unum,unus mundus\nAnd all the satellites imbue" << endl;
+        cout << "The purple yellow green red orange and the blue\nOh it's a crazy world, it's true\n............" << endl;
+        cout << "In this crazy world, I do\nI just want ..." << endl;
+        DrawWorld();
+    }
+    else if (te == "syjtql" || te == "junrtql" || te == "小龙虾" || te == "垃圾桶"||te=="tql"||te=="syj"||te=="junr") {
+        cout << "嘿嘿嘿嘿嘿嘿，谢谢夸奖，junr一定再接再厉！\nP.S. @垃圾桶 @小龙虾 爱你们哦" << endl;
+        DrawHeart(rand() % 12);
+    }
+    else if (te == "wheregiegie" || te == "fxw"||te=="方兴未"||te=="xunr") {
+        cout << "fxw:爱你哦@yjx\nyjx:爱你哦@fxw" << endl;
+    colormode = rand()%3+12;
+        DrawHeart(colormode);
+    }
+    else if (te == "ycyy" || te == "ycy" || te == "余辰阳") {
+        cout << "别喊我啦，我是最帅的！" << endl;
+        DrawHeart(1);
+    }
+    else if (te == "jjx" || te == "季锦熙") {
+        cout << "牛马！" << endl;
+        DrawHeart(4);
+    }
+    else if (te == "wx" || te == "tsw" || te == "危啸" || te == "童舒雯") {
+        cout << "because w=w,x=s, so tsw/wx=t does not matter with distance, but become pernament as the entropy continue to grow." << endl;
+        colormode = rand() % 6 + 6;
+        DrawHeart(colormode);
+    }
+    else if (te == "yy" || te == "lyx" || te == "俞越" || te == "鲁昀熙") {
+        cout << "" << endl;
+        colormode = rand() % 6 + 6;
+        DrawHeart(colormode);
+    }
+    else {
+        try {
+            throw runtime_error("donotagree");
+        }
+        catch(runtime_error err){
+            cout << "Successfully logged out! Hope you come again!" << endl;
+            return 0;
+        }
+    }
+    srand((unsigned)time(NULL));
+        int timer = 0;
+        int ret = 0;
+    while (1) {
+        bool i = rand();
+        if (i == 1) {
+            ret = Puzzle1();
+        }
+        else {
+            ret = Puzzle2();
+        }   
+        if (ret == 1) {
+                cout << "Right answer! Successfully logged in!" << endl;
+                break;
+            }
+            else if (ret == 2) {
+                cout << "Time is out! Please solve another problem." << endl;
+            }
+            else {
+                timer++;
+                cout << "Wrong answer! Please solve a new puzzle." << endl;
+            }
+        if (timer >=5) {
+            cout << "You have already tried five times! Please come later..."<<endl;
+            return 0;
+        }
+    }
+    string pw;
+    return 1;
+}
+
+double SIN(double theta) {
+    double result=0;
+    for (int i = 1; i <= 17; i += 2) {
+        int denominater=1;
+        for (int j = 1; j <= i; j++) {
+            denominater *= j;
+        }
+        int symb;
+        if (i % 4 == 1) {
+            symb = 1;
+        }
+        else {
+            symb = -1;
+        }
+        double mono=symb*pow(theta,i)/denominater;
+        result += mono;
+    }
+    return result;
+}
+
+BOOL TestSin() {
+    cout << "input x;";
+    long double x;
+    cin >> x;
+    long double r = SIN(x);
+    cout << r << endl;
+    cout << sin(x) << endl;
+
+    return true;
+}
+
+DOUBLE Root(double sq) {
+    double root=0;
+    vector<int> digit(15);
+
+    int md;
+    int i = 0;
+    bool t1 = 0;
+    bool t2 = 0;
+    while (1) {
+        if (sq >= 1) {
+            if (sq * pow(10, -i) < 1) {
+                t1++;
+                md = i-1;
+                break;
+            }
+        }
+        if (sq < 1) {
+            if (sq * pow(10, i) >= 1) {
+                t2++;
+                md = -i;
+                break;
+            }
+        }
+        
+        i++;
+    }
+    long float tmp1;
+    if (md % 2 == 0) {
+        long double tmp2 = pow(10, -md);
+        tmp1 = sq * tmp2;
+    }
+    else {
+        long double tmp2 = pow(10, -md+1);
+        tmp1 = sq * tmp2;
+    }
+
+    for (int d = 0; d <= 14; d++) {
+        double pro;
+        long float x=0;
+        if (d > 0) {
+            for (int j = 0; j < d; j++) {
+                x += digit[j] * pow(10, -j);
+            }
+            //cout << x << endl;
+        }
+        for (long double i = 0; i+=1; i <= 9) {
+            long float ap = pow(10, -d);
+            long float y =i*ap + x;
+            long float y1 = y * y;
+            long float y2 = pow(10, -2 * d);
+            if (y1 <= tmp1 && (y1+2*y1*ap+y2) > tmp1) {
+                digit[d] = i;
+                break;
+            }
+        }
+    }
+
+    int times;
+    if (md % 2 == 0) {
+        times = md / 2;
+    }
+    else {
+        times = (md - 1) / 2;
+    }
+
+    for (int i = 0; i <= 14; i++) {
+        root += digit[i] * pow(10, -i);
+    }
+
+    root *= pow(10, times);
+
+    return root;
+}
+
+VOID TestRoot(VOID) {
+    long double x;
+    cout << "input x;";
+    cin >> x;
+    long float root = Root(x);
+    cout << root<<endl;
+    cout << sqrt(x);
+
+}
+
+BOOL DrawPendulum(struct fs size, struct fs O, double l, vector<double> angle, double t) {
+    int tt = 0;
+    bool i = true;
+    double ac = angle[0];
+    int times = angle[1];
+    if (l * 500 > 
+        size.Y - 100) {
+        l = 1;
+    }
+    double ac1 = 0.01;
+    int cmode = angle[2] / 1;
+    double k2 = 0;
+    double k3 = 0;
+    double b00 = 10;
+    int dt = 0;
+    SHORT r=0, g=0, b = 0;
+    //************************
+    cout << cmode << endl;
+    if (cmode == 0) {
+        r = g = b = 255;
+    }
+    else if (cmode == 1)
+    {
+        r = 255;
+    }
+    else if (cmode == 2)
+    {
+        r = 255;
+        g = 128;
+    }
+    else if (cmode == 3)
+    {
+        r =g= 255;
+    }
+    else if (cmode == 4)
+    {
+        r = 128;
+        g = 255;
+    }
+    else if (cmode == 5)
+    {
+        g = b = 255;
+    }
+    else if (cmode == 6)
+    {
+        r = 128;
+        b = 255;
+    }
+    else if (cmode == 7)
+    {
+        r = 255;
+        b = 255;
+    }
+    else if(cmode==9)   {
+        r = g = b = 128;
+    }
+    //****************
+
+    long long t1=gettime(1);
+    double i1 = 3;
+                int r1=255,g1=255,b1=255;
+                int bgc1 = 0, bgc2=0,bgc=0;
+                char sys[9];
+                    sys[0] = 99;
+                    sys[1] = 111;
+                    sys[2] = 108;
+                    sys[3] = 111;
+                    sys[4] = 114;
+                    sys[5] = 32;
+        while(1){
+            if (i1 > times + 2) {
+                i1 = 3;
+                tt++;
+            }
+            if (tt >= t) {
+                break;
+            }
+            //*************************
+            if (cmode == 8 || cmode == 10 || cmode == 11 || cmode == 12) {
+                if (cmode == 8) {
+                    r1 += 50;
+                    g1 += 50;
+                    b1 += 50;
+                    switch (bgc1) {
+                    case 0:
+                        bgc = 15;
+                        bgc2 = 7;
+                        break;
+                    case 15:
+                        bgc = 7;
+                        bgc2 = 0;
+                        break;
+                    case 7:
+                        bgc = 0;
+                        bgc2 = 15;
+                        break;
+                    default:
+                        bgc1 = bgc = bgc2 = 0;
+                        break;
+                    }
+
+                }
+                else if (cmode == 10) {
+                    switch (bgc1) {
+                    case 0:
+                        bgc = 4;
+                        bgc2 = 7;
+                        break;
+                    case 4:
+                        bgc = 7;
+                        bgc2 = 0;
+                        break;
+                    case 12:
+                        bgc = 15;
+                        bgc2 = 4;
+                        break;
+                    case 15:
+                        bgc = 0;
+                        bgc2 = 15;
+                        break;
+                    default:
+                        bgc1 = bgc = bgc2 = 0;
+                            break;
+                    }
+
+                    r1 += 255;
+                    g1 =0;
+                    b1 = 0;
+                }
+                else if (cmode == 11) {
+                    switch (bgc1){
+                    case 0:
+                        bgc = 13;
+                        bgc2 = 0;
+                        break;
+                    case 5:
+                        bgc = 15;
+                        bgc2 = 5;
+                        break;
+                    case 13:
+                        bgc = 5;
+                        bgc2 = 15;
+                        break;
+                    case 15:
+                        bgc = 0;
+                        bgc2 = 13;
+                        break;
+                    default:
+                        bgc1 = bgc = bgc2 = 0;
+                        break;
+                    }
+                    r1 += 255;
+                    g1 = 0;
+                    b1 += 255;
+                }
+                else  {
+                    bgc+=5;
+                    bgc2 += 3;
+                    r1 += 64;
+                    g1 += 128;
+                    b1 += 32;
+                }
+                r = ColorCollision(r1);
+                g = ColorCollision(g1);
+                b = ColorCollision(b1);
+                bgc1 = bgc;
+                    sys[6] = Exchange(bgc1);
+                    sys[7] = Exchange(bgc2);
+                    system(sys);
+            }
+            //*************************
+        double k0 = SIN(angle[i1]);
+        double k1 = tan(0.5 * PI - angle[i1]);
+
+        while (1) {
+            if (watch(ac1*1000) == 1) {
+                break;
+            }
+        }
+        
+        double x1 = -k0 * l * 500;
+        double x2 = -k2 * l * 500;
+
+        DrawLine(k1, b00, O, size, RGB(r, g, b), { x1,0 }, 1);
+        DrawLine(k3, b00, O, size, RGB(0, 0, 0), { -k2 * l * 500,0 }, 1);
+        k2 = k0;
+        k3 = k1;
+        i1 += ac1 / ac;
+    }
+        double t01 = (gettime(1) - t1) ;
+        double t011 = t01 / 1000;
+    cout << "Spent "<<t011<<" sec to finish the picture." << endl;
+    return i;
+}
+
+BOOL pendulum(struct fs originalpoint, struct fs size, double g, double l,long double ac) {
+    HDC mydc = GetDC(GetConsoleWindow());
+    double a;
+    
+    vector<double> velosity;
+
+
+    double theta = 0.00001;
+    while (1) {
+    double t = 0;
+    long double v=0;
+    long double s = 0;
+        double theta1 = theta;
+        while (1) {
+            double k0= SIN(theta1);
+            a = g * k0;
+            double x0 = k0 * l;
+            s = 0.00001 * v ;
+            v += a * 0.00001;
+            s += 0.0000000005 * a;
+            t += 0.00001;
+
+            double k = 1/tan(theta1);
+            double b = 19;
+            
+            //system("cls");
+            DrawLine(k, 19, originalpoint, size, (255, 255, 255), { -k0,0 },1);
+            theta1 -= s;
+            if (theta1 <0) {
+                break;
+            }
+        }
+        long double t1 = t * 4.00000;
+        
+        double t0;
+        t0= 2 * PI * Root(l / g);
+
+        long double delta = (t0 - t1) / t1;
+        theta += 0.002; 
+        if (theta >= PI/2) {
+            break;
+        }
+    }
+        /*SetPixel(mydc, theta * 500, originalpoint.Y - t1*500+30*size.Y/20,(255,255,255));
+        SetPixel(mydc, theta * 500, originalpoint.Y - t0*500+30*size.Y/20 , (255,255,255));*/
+    return true;
+}
+
+double Reflect(double theta) {
+    double r=0;
+    bool symb = 0;
+
+    return r;
+}
+
+vector<double> pendulum2(struct fs originalpoint, struct fs size) {
+    HDC mydc = GetDC(GetConsoleWindow());
+    double g ;
+    double l;
+    double a;
+    double theta;
+    double ac;
+    double tt;
+    double cmode;
+    while (1) {
+        if (g = input("define the data") <= 0.0001) {
+            cout << "Not valid g! Please try again." << endl;
+        }
+        else {
+            break;
+        }
+    }
+    cout << endl;
+     l=input("L=");
+    cout << endl;
+    ac=input("accuration(no less than 0.00001 and no more than 0.1)=");
+    cout << endl;
+    while (1) {
+    if (theta = input("theta(no more than 1.57)=") > 1.57) {
+        cout << "Not valid theta! Try again;" << endl;
+    }
+    else {
+        break;
+    }
+    }
+    cout << endl;
+    tt = input1("repeat times(no less than 1)=",0,1000000);
+    cout << endl;
+    cmode = SetColor();
+    system("cls");
+    cout << "Drawing......"<<endl;
+
+    vector<double> angle;
+    angle.push_back( ac);
+    angle.push_back(0);
+    angle.push_back(cmode);
+
+    bool j1 = 0;
+    double t2;
+        double t = 0;
+        long double v = 0;
+        long double s = 0;
+        double theta1 = theta;
+        long times = 0;
+        double theta2 = 0;
+        while (1) {
+            double k0 = SIN(theta1);
+            a = g * k0;
+            s = ac * v;
+            v += a * ac;
+            s += 0.5*ac*ac * a;
+            t += ac;
+            times++;
+            angle.push_back(theta1);
+            double k = tan(0.5*PI-theta1);
+
+        double k2 = tan(0.5 * PI - theta2);
+        double x2 = -500 * SIN(theta2);
+
+            theta2 = theta1;
+
+            theta1 -= s/l;
+            if (theta1 < 0&&j1==false) {
+                j1++;
+                t2 = t;
+                
+            }
+            if (j1 == true) {
+                if (t >= 4 * t2) {
+                    break;
+                }
+                if (theta1 > theta) {
+                    break;
+                }
+            }
+        }
+        angle[1] = times;
+
+        double t0;
+        t0 = 2 * PI * sqrt(l / g);
+
+         double delta = (t0 - t) / t;
+
+        cout <<t<<" sec  "<<delta<<" sec"<<endl;
+
+
+        DrawPendulum(size, originalpoint, l, angle,tt);
+    return angle;
+}
+
+VOID CatchError(){
+}
+
+bool wait() {
+    RevealConsoleCloseButton();
+    cout << "Push any key to exit";
+    string wait;
+    fstream file("promotion.html", ios::out);
+    file << " " << endl;
+    file << "<html><head><p style='color:white;background-color:blue;font-size:50px'>Thanks for using the program!<br/><p style='color:red;font-size:30px'>Spent nearly 30 hours on that simple program😂<br/>Hope Everyone will love it.</p></p></head><body>";
+    file << "<div id = 'last' style = 'background-color:rgb(80,93,109);margin-top:200px;margin-bottom:0;height:400px;width:100%'><div style = 'float:left;margin-left:100px;'><p style = 'color:red;font-size:50px'>feedback</p><a target = '_blank' value = 'QQ' title = 'Click to open QQ to feed back;'  href = 'http://wpa.qq.com/msgrd?v=3&uin=1803784472&site=qq&menu=yes'><p style = 'color:snow;font-style:italic;font-weight:lighter;font-size:20px;margin-left:20px'>QQ</p></a><a target = '_blank' value = 'Mail' title = 'Click to open Mail to feed back;'  href = 'mailto:yangjinxun2006@gmail?Subject=Feed%20back%20%20(name:  )'><p id = 'mail' style = 'color:snow;font-style:italic;font-size:20px;margin-left:20px'>email</p></a><a target = '_blank' value = 'Telegram' title = 'Click to open telegram to feed back;'  href = 'https://t.me/invisible2006y'><p  style = 'color:snow;font-style:italic;font-weight:lighter;font-size:20px;margin-left:20px'>Telegram</p></a><a target = '_blank' value = 'Messenger' title = 'Click to open telegram to feed back;'  href = 'sms:+8613277083896'><p id = 'messenger' style = 'color:snow;font-style:italic;font-weight:lighter;font-size:20px;margin-left:20px'>messenger</p></a></div></div>";
+    file << "</body></html>";
+    file.close();
+    system("promotion.html");
+    cin >> wait;
+    if (wait != "0")
+        return 0;
+    else
+        return -1;
+}
+
+int main() {
+    system("color F3");
+    AutoSetColor();
+    struct fs size = SetSize(), O=SetOriginalpoint(size);
+    KillConsoleCloseButton();
+    if(LOGGIN()==0) return wait();
+    pendulum2(O, size);
+    return wait();
+}
